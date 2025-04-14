@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCompany } from '@/utils/companyDatabase';
 
-type Props = {
-  params: { id: string }
-}
-
 export async function GET(
   request: NextRequest,
-  props: Props
+  { params }: { params: { id: string } }
 ) {
   try {
-    const companyId = props.params.id;
+    const companyId = params.id;
 
     // Handle both ID and name-based lookups
     let companyData;
@@ -51,7 +47,7 @@ export async function GET(
     console.log(`Successfully retrieved company data for: ${companyId}`);
     return NextResponse.json(companyData);
   } catch (error) {
-    console.error(`Error fetching company ${props.params.id}:`, error);
+    console.error(`Error fetching company ${params.id}:`, error);
     return NextResponse.json({ error: 'Failed to fetch company data' }, { status: 500 });
   }
 }
