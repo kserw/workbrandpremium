@@ -396,24 +396,70 @@ export const mastercardData: CompanyData = {
       platforms: ["LinkedIn", "Instagram", "X (Twitter)"],
       brandedHashtags: ["#WeAreMastercard"]
     },
-    mediaCoverage: {
-      positive: [
-        "Glassdoor Best Places to Work 2023 & 2024",
-        "Fortune 100 Best Companies 2023",
-        "Forbes Top Companies for Women 2024",
-        "High LGBTQ+ inclusion score"
-      ],
-      negative: [
-        "Layoffs affecting 3% of workforce in 2024",
-        "Pushback on return-to-office policy"
-      ]
-    },
+    mediaCoverage: [
+      {
+        source: "Glassdoor",
+        title: "Glassdoor Best Places to Work 2023 & 2024",
+        sentiment: "positive",
+        date: "2024-01"
+      },
+      {
+        source: "Fortune",
+        title: "Fortune 100 Best Companies 2023",
+        sentiment: "positive",
+        date: "2023-12"
+      },
+      {
+        source: "Forbes",
+        title: "Forbes Top Companies for Women 2024",
+        sentiment: "positive",
+        date: "2024-02"
+      },
+      {
+        source: "Internal",
+        title: "High LGBTQ+ inclusion score",
+        sentiment: "positive",
+        date: "2024-03"
+      },
+      {
+        source: "Reuters",
+        title: "Layoffs affecting 3% of workforce in 2024",
+        sentiment: "negative",
+        date: "2024-01"
+      },
+      {
+        source: "Bloomberg",
+        title: "Pushback on return-to-office policy",
+        sentiment: "negative",
+        date: "2024-02"
+      }
+    ],
     recommendations: [
-      "Improve leadership communication and transparency",
-      "Offer more flexible return-to-office options",
-      "Expand upskilling and career mobility programs",
-      "Double down on DEI storytelling and ERG support",
-      "Track sentiment monthly and compare with competitors"
+      {
+        category: "Leadership",
+        action: "Improve leadership communication and transparency",
+        priority: "high"
+      },
+      {
+        category: "Work Environment",
+        action: "Offer more flexible return-to-office options",
+        priority: "high"
+      },
+      {
+        category: "Career Development",
+        action: "Expand upskilling and career mobility programs",
+        priority: "medium"
+      },
+      {
+        category: "DEI",
+        action: "Double down on DEI storytelling and ERG support",
+        priority: "medium"
+      },
+      {
+        category: "Analytics",
+        action: "Track sentiment monthly and compare with competitors",
+        priority: "low"
+      }
     ]
   }
 };

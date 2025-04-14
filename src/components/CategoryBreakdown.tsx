@@ -1,5 +1,5 @@
 import React from 'react';
-import { CompanyData, Category, categoryToSubcategories, subcategoryLabels } from '@/types';
+import { CompanyData, Category, categoryToSubcategories, subcategoryLabels, categoryLabels } from '@/types';
 
 interface CategoryBreakdownProps {
   category: Category;

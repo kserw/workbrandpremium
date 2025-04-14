@@ -13,7 +13,6 @@ import DashboardOverview from '@/components/DashboardOverview';
 import StatCard from '@/components/StatCard';
 import DetailedMastercardAnalysis from '@/components/DetailedMastercardAnalysis';
 import Image from "next/image";
-import { useAuthContext } from '@/context/AuthContext';
 
 export default function Dashboard() {
   const { user, loading, logout } = useAuth();
@@ -129,6 +128,11 @@ export default function Dashboard() {
       if (competitorData && selectedCompetitor === companyName) {
         setIsLoading(false);
         return;
+      }
+      
+      // Check if user exists before accessing properties
+      if (!user) {
+        throw new Error('User not authenticated');
       }
       
       // Prepare data for analysis - using the user's company info from auth context

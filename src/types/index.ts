@@ -39,6 +39,44 @@ export interface SubcategoryScores {
   meaningfulWork: number; // 0-5 points
 }
 
+export interface ExtendedAnalysisData {
+  reportDate: string;
+  overallSentimentScore: number;
+  scores: {
+    glassdoor: {
+      rating: number;
+      recommendationRate: number;
+      ceoApproval: number;
+    };
+    socialMediaSentiment: number;
+    mediaSentiment: number;
+  };
+  competitorScores: Array<{
+    company: string;
+    score: number;
+  }>;
+  praise: string[];
+  criticism: string[];
+  socialMedia: {
+    linkedinFollowers: number;
+    instagramFollowers: number;
+    topEngagementTopics: string[];
+    platforms: string[];
+    brandedHashtags: string[];
+  };
+  mediaCoverage: Array<{
+    source: string;
+    title: string;
+    sentiment: 'positive' | 'neutral' | 'negative';
+    date: string;
+  }>;
+  recommendations: Array<{
+    category: string;
+    action: string;
+    priority: 'high' | 'medium' | 'low';
+  }>;
+}
+
 export interface CompanyData {
   interpersonalFit: number;
   thrivingAtWork: number;
@@ -47,11 +85,14 @@ export interface CompanyData {
   purposeAndInvolvement: number;
   glassdoorScore: number;
   numEmployees: number;
-  primaryColor?: string; // Optional for backward compatibility
-  top3Words: string[]; // Top 3 words associated with the employer brand
-  evpStatement: string; // Employer Value Proposition statement
+  primaryColor?: string;
+  secondaryColor?: string;
+  tertiaryColor?: string;
+  top3Words: string[];
+  evpStatement: string;
   analysis: CompanyAnalysis;
   subcategories: SubcategoryScores;
+  extendedAnalysis?: ExtendedAnalysisData;
 }
 
 export interface FormData {

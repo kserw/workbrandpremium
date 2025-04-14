@@ -1,9 +1,14 @@
-import React, { ReactNode } from 'react';
+import React, { ReactElement } from 'react';
+
+interface IconProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
 
 interface StatCardProps {
   title: string;
   value: string | number;
-  icon: ReactNode;
+  icon: ReactElement<IconProps>;
   trend?: {
     value: number;
     label: string;
@@ -33,7 +38,7 @@ export default function StatCard({
             <p className="text-white text-2xl font-bold">{value}</p>
           </div>
           <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${color}30` }}>
-            {React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6", style: { color } })}
+            {React.cloneElement(icon, { className: "h-6 w-6", style: { color } })}
           </div>
         </div>
         

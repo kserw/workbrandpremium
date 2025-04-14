@@ -2,13 +2,52 @@ import React from 'react';
 import { CompanyData } from '@/types';
 import Image from 'next/image';
 
+interface ExtendedAnalysisData {
+  reportDate: string;
+  overallSentimentScore: number;
+  scores: {
+    glassdoor: {
+      rating: number;
+      recommendationRate: number;
+      ceoApproval: number;
+    };
+    socialMediaSentiment: number;
+    mediaSentiment: number;
+  };
+  competitorScores: Array<{
+    company: string;
+    score: number;
+  }>;
+  praise: string[];
+  criticism: string[];
+  socialMedia: {
+    linkedinFollowers: number;
+    instagramFollowers: number;
+    brandedHashtags: string[];
+    topEngagementTopics: string[];
+    platforms: string[];
+  };
+  mediaCoverage: Array<{
+    source: string;
+    title: string;
+    sentiment: 'positive' | 'neutral' | 'negative';
+    date: string;
+  }>;
+  recommendations: Array<{
+    category: string;
+    action: string;
+    priority: 'high' | 'medium' | 'low';
+  }>;
+}
+
 interface DetailedMastercardAnalysisProps {
-  companyData: CompanyData;
+  companyData: CompanyData & {
+    extendedAnalysis?: ExtendedAnalysisData;
+  };
 }
 
 const DetailedMastercardAnalysis: React.FC<DetailedMastercardAnalysisProps> = ({ companyData }) => {
-  // Type assertion to access the extended data
-  const extendedData = (companyData as any).extendedAnalysis;
+  const extendedData = companyData.extendedAnalysis;
   
   // Return early if no extended data is available
   if (!extendedData) {
@@ -292,11 +331,13 @@ const DetailedMastercardAnalysis: React.FC<DetailedMastercardAnalysisProps> = ({
               Positive Coverage
             </h5>
             <ul className="space-y-2">
-              {mediaCoverage.positive.map((item, index) => (
-                <li key={index} className="bg-green-500/10 p-3 rounded-lg">
-                  <span className="text-white/80">{item}</span>
-                </li>
-              ))}
+              {mediaCoverage
+                .filter(item => item.sentiment === 'positive')
+                .map((item, index) => (
+                  <li key={index} className="bg-green-500/10 p-3 rounded-lg">
+                    <span className="text-white/80">{item.title}</span>
+                  </li>
+                ))}
             </ul>
           </div>
           
@@ -308,11 +349,13 @@ const DetailedMastercardAnalysis: React.FC<DetailedMastercardAnalysisProps> = ({
               Negative Coverage
             </h5>
             <ul className="space-y-2">
-              {mediaCoverage.negative.map((item, index) => (
-                <li key={index} className="bg-red-500/10 p-3 rounded-lg">
-                  <span className="text-white/80">{item}</span>
-                </li>
-              ))}
+              {mediaCoverage
+                .filter(item => item.sentiment === 'negative')
+                .map((item, index) => (
+                  <li key={index} className="bg-red-500/10 p-3 rounded-lg">
+                    <span className="text-white/80">{item.title}</span>
+                  </li>
+                ))}
             </ul>
           </div>
         </div>
@@ -333,7 +376,17 @@ const DetailedMastercardAnalysis: React.FC<DetailedMastercardAnalysisProps> = ({
                 {index + 1}
               </div>
               <div className="bg-white/5 p-4 rounded-lg flex-grow">
-                <p className="text-white">{recommendation}</p>
+                <div className="flex flex-col">
+                  <span className="text-white/60 text-sm mb-1">{recommendation.category}</span>
+                  <p className="text-white">{recommendation.action}</p>
+                  <span className={`text-sm mt-2 ${
+                    recommendation.priority === 'high' ? 'text-red-400' :
+                    recommendation.priority === 'medium' ? 'text-yellow-400' :
+                    'text-green-400'
+                  }`}>
+                    Priority: {recommendation.priority}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
