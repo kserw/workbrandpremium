@@ -1,53 +1,67 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCompany } from '@/utils/companyDatabase';
+import { CompanyData } from '@/types';
 
-export async function GET(request: NextRequest) {
-  // Extract the ID from the URL
-  const url = new URL(request.url);
-  const segments = url.pathname.split('/');
-  const companyId = segments[segments.length - 1];
-
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    // Handle both ID and name-based lookups
-    let companyData;
+    const companyId = params.id;
+    let companyData: CompanyData | null = null;
 
-    // Try to get by exact ID first
-    // For demo purposes, we'll map company-1, company-2, etc. to mock data
     if (companyId === 'company-1') {
       companyData = await import('@/utils/competitorData').then(
         module => module.mockCompanyData.workbrand
       );
-    } else if (companyId === 'company-2') {
-      companyData = await import('@/utils/competitorData').then(
-        module => module.mockCompanyData.acme
-      );
-    } else if (companyId === 'company-3') {
-      companyData = await import('@/utils/competitorData').then(
-        module => module.mockCompanyData.techcorp
-      );
-    } else if (companyId === 'mastercard') {
-      // For Mastercard, directly import the mastercardData which includes the extendedAnalysis field
-      companyData = await import('@/utils/competitorData').then(
-        module => {
-          console.log('Mastercard data loaded:', Object.keys(module.mastercardData));
-          return module.mastercardData;
-        }
-      );
     } else {
-      // Fall back to getting by name
-      companyData = getCompany(decodeURIComponent(companyId));
+      // For other companies, use the predefined data
+      const { googleData, walmartData, hubspotData, nasdaqData, lorealData, mastercardData } = await import('@/utils/competitorData');
+      
+      switch (companyId) {
+        case 'google':
+          companyData = googleData;
+          break;
+        case 'walmart':
+          companyData = walmartData;
+          break;
+        case 'hubspot':
+          companyData = hubspotData;
+          break;
+        case 'nasdaq':
+          companyData = nasdaqData;
+          break;
+        case 'loreal':
+        case "l'oreal":
+        case 'l oreal':
+          companyData = lorealData;
+          break;
+        case 'mastercard':
+          companyData = mastercardData;
+          break;
+        default:
+          return NextResponse.json(
+            { error: 'Company not found' },
+            { status: 404 }
+          );
+      }
     }
 
     if (!companyData) {
-      console.error(`Company not found: ${companyId}`);
-      return NextResponse.json({ error: 'Company not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Company data not found' },
+        { status: 404 }
+      );
     }
 
-    // Log successful retrieval
+    console.log(`${companyId} data loaded:`, Object.keys(companyData));
     console.log(`Successfully retrieved company data for: ${companyId}`);
+
     return NextResponse.json(companyData);
   } catch (error) {
-    console.error(`Error fetching company ${companyId}:`, error);
-    return NextResponse.json({ error: 'Failed to fetch company data' }, { status: 500 });
+    console.error('Error fetching company data:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch company data' },
+      { status: 500 }
+    );
   }
 }
