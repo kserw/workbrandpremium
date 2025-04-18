@@ -3,10 +3,10 @@ import { CompanyData } from '@/types';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const companyId = params.id;
+    const companyId = context.params.id;
     let companyData: CompanyData | null = null;
 
     if (companyId === 'company-1') {
