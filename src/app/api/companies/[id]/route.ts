@@ -3,10 +3,10 @@ import { CompanyData } from '@/types';
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const companyId = context.params.id;
+    const companyId = await Promise.resolve(params.id);
     let companyData: CompanyData | null = null;
 
     if (companyId === 'company-1') {
