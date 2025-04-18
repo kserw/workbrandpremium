@@ -15,6 +15,39 @@ import { analyzeCompany } from '@/utils/openai';
 // Helper function to add a delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Helper function to verify data has required fields
+const verifyCompanyData = (data: CompanyData | null, name: string): CompanyData | null => {
+  if (!data) {
+    console.error(`ERROR: ${name} data is null`);
+    return null;
+  }
+  
+  const requiredFields = [
+    'brandPositionAndPerception', 'compensationAndBenefits', 
+    'growthAndDevelopment', 'peopleAndCulture', 'innovationAndProducts',
+    'evpStatement', 'glassdoorScore', 'top3Words', 'subcategories', 'analysis'
+  ];
+  
+  const missingFields = requiredFields.filter(field => {
+    if (field === 'subcategories' || field === 'analysis') {
+      return !data[field as keyof CompanyData];
+    }
+    return typeof data[field as keyof CompanyData] === 'undefined';
+  });
+  
+  if (missingFields.length > 0) {
+    console.warn(`WARNING: ${name} data is missing fields:`, missingFields);
+    console.log(`${name} data available fields:`, Object.keys(data));
+    
+    if (missingFields.includes('subcategories') || missingFields.includes('analysis')) {
+      console.error(`ERROR: ${name} data is missing critical fields`);
+      return null;
+    }
+  }
+  
+  return data;
+};
+
 // Log environment check
 console.log('API Key available:', process.env.OPENAI_API_KEY ? 'Yes' : 'No');
 
@@ -36,149 +69,134 @@ export async function POST(request: NextRequest) {
     );
 
     // Get the selected competitor data
-    let competitor: CompanyData;
-    let competitorName: string;
+    let competitor: CompanyData | null = null;
+    let competitorName: string = selectedCompetitor;
 
-    switch (selectedCompetitor.toLowerCase()) {
+    // Normalize competitor name
+    const normalizedCompetitor = selectedCompetitor.toLowerCase().trim();
+
+    // Get competitor data
+    switch (normalizedCompetitor) {
       case 'google':
-        competitor = googleData;
+        competitor = { ...googleData };
         competitorName = 'Google';
         break;
       case 'walmart':
-        competitor = walmartData;
+        competitor = { ...walmartData };
         competitorName = 'Walmart';
         break;
       case 'hubspot':
-        competitor = hubspotData;
+        competitor = { ...hubspotData };
         competitorName = 'HubSpot';
         break;
       case 'nasdaq':
-        competitor = nasdaqData;
+        competitor = { ...nasdaqData };
         competitorName = 'Nasdaq';
         break;
       case 'loreal':
       case "l'oreal":
       case 'l oreal':
-        competitor = lorealData;
+        competitor = { ...lorealData };
         competitorName = "L'Oreal";
         break;
       case 'mastercard':
-        competitor = mastercardData;
+        competitor = { ...mastercardData };
         competitorName = 'Mastercard';
         break;
       default:
-        // Check if competitor exists in database
-        const competitorData = getCompany(selectedCompetitor);
-        
-        if (competitorData) {
-          competitor = competitorData;
-          competitorName = selectedCompetitor;
-        } else {
-          // Use OpenAI to analyze a new competitor
-          console.log(`Analyzing new competitor with OpenAI: ${selectedCompetitor}`);
-          const analyzedCompetitor = await analyzeCompany(selectedCompetitor);
-          
-          if (!analyzedCompetitor) {
-            return NextResponse.json(
-              { error: `We couldn't analyze "${selectedCompetitor}" at this time. Please try again later or choose a different competitor.` },
-              { status: 500 }
-            );
+        // Check database or analyze new competitor
+        competitor = getCompany(selectedCompetitor);
+        if (!competitor) {
+          console.log(`Analyzing new competitor: ${selectedCompetitor}`);
+          competitor = await analyzeCompany(selectedCompetitor);
+          if (competitor) {
+            saveCompany(selectedCompetitor, competitor);
           }
-          
-          // Save the competitor data for future use
-          saveCompany(selectedCompetitor, analyzedCompetitor);
-          competitor = analyzedCompetitor;
-          competitorName = selectedCompetitor;
         }
     }
 
-    // Check if the user's company name matches one of our predefined companies
-    let userCompanyData: CompanyData | null = null;
-    let fromDatabase = false;
-
-    const normalizedCompanyName = companyName.trim().toLowerCase();
-    if (normalizedCompanyName === 'google') {
-      userCompanyData = { ...googleData };
-    } else if (normalizedCompanyName === 'walmart') {
-      userCompanyData = { ...walmartData };
-    } else if (normalizedCompanyName === 'hubspot') {
-      userCompanyData = { ...hubspotData };
-    } else if (normalizedCompanyName === 'nasdaq') {
-      userCompanyData = { ...nasdaqData };
-    } else if (
-      normalizedCompanyName === 'loreal' ||
-      normalizedCompanyName === "l'oreal" ||
-      normalizedCompanyName === 'l oreal'
-    ) {
-      userCompanyData = { ...lorealData };
-    } else if (normalizedCompanyName === 'mastercard') {
-      userCompanyData = { ...mastercardData };
-    } else if (
-      normalizedCompanyName === 'workbrand' ||
-      normalizedCompanyName === 'workbrand global'
-    ) {
-      userCompanyData = { ...mockCompanyData.workbrand };
-    } else if (normalizedCompanyName === 'acme' || normalizedCompanyName === 'acme corporation') {
-      userCompanyData = { ...mockCompanyData.acme };
-    } else if (
-      normalizedCompanyName === 'techcorp' ||
-      normalizedCompanyName === 'techcorp inc.' ||
-      normalizedCompanyName === 'techcorp inc'
-    ) {
-      userCompanyData = { ...mockCompanyData.techcorp };
-    } else {
-      // Check if we already have this company in our database
-      userCompanyData = getCompany(companyName);
-
-      if (userCompanyData) {
-        // If found in database, mark it as from database
-        fromDatabase = true;
-        console.log(`Found company data in database for: ${companyName}`);
-      } else {
-        // If not in database, analyze using OpenAI
-        console.log(`Analyzing company with OpenAI: ${companyName}`);
-        userCompanyData = await analyzeCompany(companyName);
-        
-        if (!userCompanyData) {
-          console.error(`Failed to analyze company: ${companyName}`);
-          return NextResponse.json(
-            {
-              error: `We couldn't find information about "${companyName}". Please enter a valid company name.`,
-            },
-            { status: 400 }
-          );
-        }
-        
-        // Save the new company data to our database for future use
-        saveCompany(companyName, userCompanyData, email);
-        console.log(`Saved analyzed data for company: ${companyName}`);
-      }
-    }
-
-    if (!userCompanyData) {
-      console.error(`Failed to create data for company: ${companyName}`);
+    // Verify competitor data
+    competitor = verifyCompanyData(competitor, competitorName);
+    if (!competitor) {
       return NextResponse.json(
-        {
-          error: `We couldn't find information about "${companyName}". Please enter a valid company name.`,
-        },
-        { status: 400 }
+        { error: `We couldn't analyze "${competitorName}". Please try a different competitor.` },
+        { status: 500 }
       );
     }
 
-    // Add a delay of 2 seconds if the data was from the database
-    // to show the loading screen for a better user experience
-    if (fromDatabase) {
-      await delay(2000);
-    } else {
-      // Add a longer delay for "new" companies to simulate analysis
-      await delay(4000);
+    // Get user company data
+    let userCompanyData: CompanyData | null = null;
+    let fromDatabase = false;
+
+    // Normalize company name
+    const normalizedCompanyName = companyName.toLowerCase().trim();
+
+    // Check for predefined companies
+    switch (normalizedCompanyName) {
+      case 'google':
+        userCompanyData = { ...googleData };
+        break;
+      case 'walmart':
+        userCompanyData = { ...walmartData };
+        break;
+      case 'hubspot':
+        userCompanyData = { ...hubspotData };
+        break;
+      case 'nasdaq':
+        userCompanyData = { ...nasdaqData };
+        break;
+      case 'loreal':
+      case "l'oreal":
+      case 'l oreal':
+        userCompanyData = { ...lorealData };
+        break;
+      case 'mastercard':
+        userCompanyData = { ...mastercardData };
+        break;
+      case 'workbrand':
+      case 'workbrand global':
+        userCompanyData = { ...mockCompanyData.workbrand };
+        break;
+      case 'acme':
+      case 'acme corp':
+        userCompanyData = { ...mockCompanyData.acme };
+        break;
+      case 'techcorp':
+      case 'techcorp inc.':
+      case 'techcorp inc':
+        userCompanyData = { ...mockCompanyData.techcorp };
+        break;
+      default:
+        // Check database or analyze new company
+        userCompanyData = getCompany(companyName);
+        if (userCompanyData) {
+          fromDatabase = true;
+        } else {
+          console.log(`Analyzing company: ${companyName}`);
+          userCompanyData = await analyzeCompany(companyName);
+          if (userCompanyData) {
+            saveCompany(companyName, userCompanyData, email);
+          }
+        }
     }
+
+    // Verify user company data
+    userCompanyData = verifyCompanyData(userCompanyData, companyName);
+    if (!userCompanyData) {
+      return NextResponse.json(
+        { error: `We couldn't analyze "${companyName}". Please try again.` },
+        { status: 500 }
+      );
+    }
+
+    // Add a delay for better UX
+    await delay(fromDatabase ? 2000 : 4000);
 
     console.log(`Successfully processed request for: ${companyName}`);
     return NextResponse.json({
       userCompany: userCompanyData,
       competitor,
-      competitorName,
+      competitorName
     });
   } catch (error) {
     console.error('Error in analyze API:', error);

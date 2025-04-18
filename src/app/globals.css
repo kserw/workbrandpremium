@@ -30,6 +30,8 @@
 
 html {
   height: 100%;
+  background: var(--tech-gradient);
+  overscroll-behavior: none;
 }
 
 body {
@@ -41,6 +43,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   padding-bottom: 0;
+  overscroll-behavior: none;
 }
 
 /* Main background overlay */
@@ -330,4 +333,17 @@ body::after {
 
 .dashboard-tab:hover::after {
   width: 40%;
+}
+
+@keyframes fade-slide-up {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-slide-up {
+  animation: fade-slide-up 0.5s ease-out forwards;
 }

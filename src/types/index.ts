@@ -1,10 +1,10 @@
 export interface CompanyAnalysis {
   overview: string;
-  interpersonalFit: string;
-  thrivingAtWork: string;
-  experienceAndCompetency: string;
-  recognitionAndCompensation: string;
-  purposeAndInvolvement: string;
+  brandPositionAndPerception: string;
+  compensationAndBenefits: string;
+  growthAndDevelopment: string;
+  peopleAndCulture: string;
+  innovationAndProducts: string;
 }
 
 export interface SubcategoryScores {
@@ -78,13 +78,17 @@ export interface ExtendedAnalysisData {
 }
 
 export interface CompanyData {
-  interpersonalFit: number;
-  thrivingAtWork: number;
-  experienceAndCompetency: number;
-  recognitionAndCompensation: number;
-  purposeAndInvolvement: number;
+  brandPositionAndPerception: number;
+  compensationAndBenefits: number;
+  growthAndDevelopment: number;
+  peopleAndCulture: number;
+  innovationAndProducts: number;
   glassdoorScore: number;
   numEmployees: number;
+  linkedinFollowers: number;
+  headquarters: string;
+  stockTicker?: string;
+  stockPrice?: number;
   primaryColor?: string;
   secondaryColor?: string;
   tertiaryColor?: string;
@@ -93,6 +97,13 @@ export interface CompanyData {
   analysis: CompanyAnalysis;
   subcategories: SubcategoryScores;
   extendedAnalysis?: ExtendedAnalysisData;
+  companyName?: string;
+  // Legacy field mappings for backward compatibility
+  interpersonalFit?: number;
+  thrivingAtWork?: number;
+  experienceAndCompetency?: number;
+  recognitionAndCompensation?: number;
+  purposeAndInvolvement?: number;
 }
 
 export interface FormData {

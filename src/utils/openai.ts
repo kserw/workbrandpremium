@@ -1,9 +1,16 @@
 import OpenAI from 'openai';
 import { CompanyData } from '@/types';
 
-// Initialize OpenAI client
+// Initialize OpenAI client with better error handling
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+if (!OPENAI_API_KEY) {
+  console.error('OPENAI_API_KEY is not set in environment variables');
+  throw new Error('OpenAI API key is required');
+}
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: OPENAI_API_KEY,
 });
 
 // Function to limit the total score to a maximum of 85 points
@@ -57,82 +64,142 @@ function limitTotalScore(data: CompanyData): CompanyData {
 }
 
 export const analyzeCompany = async (companyName: string): Promise<CompanyData | null> => {
+  if (!OPENAI_API_KEY) {
+    console.error('OpenAI API key is not configured');
+    throw new Error('OpenAI API key is required');
+  }
+
   try {
+    console.log(`Starting analysis for ${companyName} using GPT-4o`);
+    
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",  // Using GPT-4o model
       messages: [
         {
           role: "system",
-          content: "You are an expert in employer branding and company analysis. Analyze the given company and provide insights about their employer brand."
+          content: "You are an expert in employer branding and company analysis. Your responses must be in valid JSON format with all required fields for the CompanyData type."
         },
         {
           role: "user",
-          content: `Analyze the employer brand of ${companyName}. Focus on their strengths, areas for improvement, and how they compare to industry standards.`
+          content: `Analyze the employer brand of ${companyName}. Return the analysis in JSON format with the following structure:
+{
+  "brandPositionAndPerception": number (0-20),
+  "compensationAndBenefits": number (0-20),
+  "growthAndDevelopment": number (0-20),
+  "peopleAndCulture": number (0-20),
+  "innovationAndProducts": number (0-20),
+  "glassdoorScore": number (0-5),
+  "numEmployees": number,
+  "linkedinFollowers": number,
+  "headquarters": string,
+  "stockTicker": string (optional),
+  "stockPrice": number (optional),
+  "primaryColor": string (optional),
+  "top3Words": string[],
+  "evpStatement": string,
+  "subcategories": {
+    "diversityAndInclusion": number (0-5),
+    "leadershipEffectiveness": number (0-5),
+    "employeeAdvocacy": number (0-5),
+    "workplaceCulture": number (0-5),
+    "employerValueProposition": number (0-5),
+    "careerDevelopment": number (0-5),
+    "innovationAdvancement": number (0-5),
+    "workLifeBalance": number (0-5),
+    "employeeExperience": number (0-5),
+    "competencyUtilization": number (0-5),
+    "professionalGrowth": number (0-5),
+    "resourceAccess": number (0-5),
+    "compensationCompetitiveness": number (0-5),
+    "talentRetention": number (0-5),
+    "performanceRecognition": number (0-5),
+    "compensationTransparency": number (0-5),
+    "socialResponsibility": number (0-5),
+    "sustainabilityInitiatives": number (0-5),
+    "employeeEngagement": number (0-5),
+    "meaningfulWork": number (0-5)
+  },
+  "analysis": {
+    "overview": string,
+    "brandPositionAndPerception": string,
+    "compensationAndBenefits": string,
+    "growthAndDevelopment": string,
+    "peopleAndCulture": string,
+    "innovationAndProducts": string
+  }
+}`
         }
       ],
       temperature: 0.7,
-      max_tokens: 1000
+      max_tokens: 2000,
+      response_format: { type: "json_object" }
     });
 
-    // Check if we have a content response
     if (!response.choices[0].message.content) {
       console.error('OpenAI returned empty content');
       return null;
     }
 
     try {
-      // Try to parse the JSON response
       const result = JSON.parse(response.choices[0].message.content);
       
       // Store the company name in the result for reference
       result.companyName = companyName;
       
-      // Ensure critical fields have at least default values
-      if (!result.evpStatement) {
-        console.log(`Adding default evpStatement for ${companyName}`);
-        result.evpStatement = `${companyName} is committed to creating a positive and supportive work environment that enables employees to grow professionally while making meaningful contributions.`;
-      }
+      // Ensure all required fields exist with proper types
+      const requiredFields = [
+        'brandPositionAndPerception', 'compensationAndBenefits', 'growthAndDevelopment',
+        'peopleAndCulture', 'innovationAndProducts', 'glassdoorScore',
+        'numEmployees', 'linkedinFollowers', 'headquarters', 'top3Words', 
+        'evpStatement', 'subcategories', 'analysis'
+      ];
       
-      if (!result.top3Words || !Array.isArray(result.top3Words) || result.top3Words.length === 0) {
-        console.log(`Adding default top3Words for ${companyName}`);
-        result.top3Words = ["Professional", "Innovative", "Dedicated"];
-      }
-      
-      if (!result.subcategories) {
-        console.log(`Creating default subcategories for ${companyName}`);
-        result.subcategories = {};
-        
-        // Add default values for all subcategory scores (3 out of 5 for everything)
-        for (const subcategory of [
-          "diversityAndInclusion", "leadershipEffectiveness", "employeeAdvocacy", "workplaceCulture",
-          "employerValueProposition", "careerDevelopment", "innovationAdvancement", "workLifeBalance",
-          "employeeExperience", "competencyUtilization", "professionalGrowth", "resourceAccess",
-          "compensationCompetitiveness", "talentRetention", "performanceRecognition", "compensationTransparency",
-          "socialResponsibility", "sustainabilityInitiatives", "employeeEngagement", "meaningfulWork"
-        ]) {
-          result.subcategories[subcategory] = 3;
+      for (const field of requiredFields) {
+        if (!(field in result)) {
+          console.error(`Missing required field: ${field}`);
+          return null;
         }
       }
       
-      if (!result.analysis) {
-        console.log(`Creating default analysis for ${companyName}`);
-        result.analysis = {
-          overview: `${companyName} demonstrates a balanced approach to employee experience, with particular strengths in innovation and professional development.`,
-          interpersonalFit: `${companyName} fosters an inclusive workplace environment with effective leadership structures.`,
-          thrivingAtWork: `${companyName} provides opportunities for career advancement and encourages a healthy work-life balance.`,
-          experienceAndCompetency: `${companyName} equips employees with the necessary tools and resources to excel in their roles.`,
-          recognitionAndCompensation: `${companyName} offers competitive compensation packages and recognizes employee contributions.`,
-          purposeAndInvolvement: `${companyName} engages employees in meaningful work that aligns with the company's broader mission.`
-        };
+      // Ensure scores are numbers between 0-20 for main categories
+      const mainCategories = [
+        'brandPositionAndPerception', 'compensationAndBenefits', 'growthAndDevelopment',
+        'peopleAndCulture', 'innovationAndProducts'
+      ];
+      
+      for (const category of mainCategories) {
+        result[category] = Math.min(20, Math.max(0, Number(result[category]) || 0));
       }
+      
+      // Ensure subcategory scores are numbers between 0-5
+      if (result.subcategories) {
+        for (const key in result.subcategories) {
+          result.subcategories[key] = Math.min(5, Math.max(0, Number(result.subcategories[key]) || 0));
+        }
+      }
+      
+      // Map the new category names to the old ones for compatibility
+      result.interpersonalFit = result.brandPositionAndPerception;
+      result.thrivingAtWork = result.growthAndDevelopment;
+      result.experienceAndCompetency = result.peopleAndCulture;
+      result.recognitionAndCompensation = result.compensationAndBenefits;
+      result.purposeAndInvolvement = result.innovationAndProducts;
       
       // Apply the total score limitation
       const limitedResult = limitTotalScore(result);
       
-      console.log(`Successfully analyzed ${companyName}`);
+      console.log(`Successfully analyzed ${companyName} with scores:`, {
+        brandPositionAndPerception: limitedResult.brandPositionAndPerception,
+        compensationAndBenefits: limitedResult.compensationAndBenefits,
+        growthAndDevelopment: limitedResult.growthAndDevelopment,
+        peopleAndCulture: limitedResult.peopleAndCulture,
+        innovationAndProducts: limitedResult.innovationAndProducts
+      });
+      
       return limitedResult;
-    } catch (error) {
-      console.error('Error parsing OpenAI response:', error);
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      console.error('OpenAI response content:', response.choices[0].message.content);
       return null;
     }
   } catch (error) {

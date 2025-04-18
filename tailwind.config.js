@@ -14,6 +14,15 @@ module.exports = {
         'workbrand-blue': '#2F3295',
         'workbrand-pink': '#FE619E',
       },
+      keyframes: {
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
+      animation: {
+        'fade-in': 'fade-in 0.3s ease-in-out',
+      },
     },
   },
   plugins: [require('@tailwindcss/forms')],

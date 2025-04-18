@@ -1,6 +1,7 @@
 import React from 'react';
 import { CompanyData } from '@/types';
 import Image from 'next/image';
+import SocialPresence from '@/components/SocialPresence';
 
 interface ExtendedAnalysisData {
   reportDate: string;
@@ -77,13 +78,13 @@ const DetailedMastercardAnalysis: React.FC<DetailedMastercardAnalysisProps> = ({
       <div className="glass p-6 rounded-lg">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h3 className="text-xl font-semibold text-white flex items-center">
-              <span className="mr-2">Mastercard Employer Brand Analysis</span>
+            <h3 className="text-xl font-semibold text-white flex items-center" style={{ color: 'white' }}>
+              <span className="mr-2" style={{ color: 'white' }}>Mastercard Employer Brand Analysis</span>
               <span className="text-white bg-white/10 px-2 py-1 rounded-md">
                 April 2025
               </span>
             </h3>
-            <p className="text-white mt-1">Comprehensive employer brand assessment</p>
+            <p className="text-white mt-1" style={{ color: 'white' }}>Comprehensive employer brand assessment</p>
           </div>
           <div className="bg-gradient-to-r from-[#EB001B] to-[#F79E1B] h-16 w-16 rounded-full flex items-center justify-center">
             <div className="bg-black/20 h-14 w-14 rounded-full flex items-center justify-center backdrop-blur-sm">
@@ -251,73 +252,8 @@ const DetailedMastercardAnalysis: React.FC<DetailedMastercardAnalysisProps> = ({
         </div>
       </div>
       
-      {/* Social Media Presence */}
-      <div className="glass p-6 rounded-lg">
-        <h4 className="text-lg font-medium text-white mb-4">Social Media Presence</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                </svg>
-                <span className="text-white">LinkedIn Followers</span>
-              </div>
-              <span className="text-white font-bold">{socialMedia.linkedinFollowers.toLocaleString()}</span>
-            </div>
-            
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-pink-500" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-                <span className="text-white">Instagram Followers</span>
-              </div>
-              <span className="text-white font-bold">{socialMedia.instagramFollowers.toLocaleString()}</span>
-            </div>
-            
-            <div className="mt-4">
-              <h5 className="text-white font-medium mb-2">Branded Hashtags</h5>
-              <div className="flex flex-wrap gap-2">
-                {socialMedia.brandedHashtags.map((hashtag, index) => (
-                  <span 
-                    key={index}
-                    className="bg-[#FF5F00]/20 text-[#F79E1B] px-3 py-1 rounded-full text-sm"
-                  >
-                    {hashtag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-          
-          <div>
-            <h5 className="text-white font-medium mb-2">Top Engagement Topics</h5>
-            <ul className="space-y-2">
-              {socialMedia.topEngagementTopics.map((topic, index) => (
-                <li key={index} className="bg-white/5 p-3 rounded-lg flex items-center">
-                  <div className="h-2 w-2 rounded-full bg-[#EB001B] mr-3"></div>
-                  <span className="text-white/80">{topic}</span>
-                </li>
-              ))}
-            </ul>
-            
-            <div className="mt-4">
-              <h5 className="text-white font-medium mb-2">Active Platforms</h5>
-              <div className="flex flex-wrap gap-2">
-                {socialMedia.platforms.map((platform, index) => (
-                  <span 
-                    key={index}
-                    className="bg-white/10 text-white px-3 py-1 rounded-lg text-sm"
-                  >
-                    {platform}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Social Presence */}
+      <SocialPresence company={companyData} />
       
       {/* Media Coverage */}
       <div className="glass p-6 rounded-lg">

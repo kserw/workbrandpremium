@@ -1,14 +1,52 @@
 import { useEffect, useState } from 'react';
+import NotificationsPanel from './NotificationsPanel';
 
 interface TopNavProps {
   title: string;
   subtitle?: string;
   showMobileMenu: boolean;
   toggleMobileMenu: () => void;
+  showDateTime?: boolean;
 }
 
-export default function TopNav({ title, subtitle, showMobileMenu, toggleMobileMenu }: TopNavProps) {
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  timestamp: string;
+  read: boolean;
+}
+
+export default function TopNav({ title, subtitle, showMobileMenu, toggleMobileMenu, showDateTime = true }: TopNavProps) {
   const [time, setTime] = useState(new Date());
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([
+    {
+      id: '1',
+      title: 'New Competitor Analysis',
+      message: 'A new competitor analysis is available for Google.',
+      type: 'info',
+      timestamp: '2024-03-20T10:30:00Z',
+      read: false
+    },
+    {
+      id: '2',
+      title: 'Score Update',
+      message: 'Your company score has been updated. View the latest changes.',
+      type: 'success',
+      timestamp: '2024-03-19T15:45:00Z',
+      read: false
+    },
+    {
+      id: '3',
+      title: 'New Recommendations',
+      message: 'We have new recommendations based on your latest data.',
+      type: 'info',
+      timestamp: '2024-03-18T09:15:00Z',
+      read: true
+    }
+  ]);
   
   useEffect(() => {
     const timer = setInterval(() => {
@@ -31,6 +69,22 @@ export default function TopNav({ title, subtitle, showMobileMenu, toggleMobileMe
     minute: '2-digit',
     hour12: true,
   });
+
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+  };
+
+  const hasUnreadNotifications = notifications.some(notification => !notification.read);
+
+  const handleMarkAsRead = (id: string) => {
+    setNotifications(notifications.map(notification => 
+      notification.id === id ? { ...notification, read: true } : notification
+    ));
+  };
+
+  const handleMarkAllAsRead = () => {
+    setNotifications(notifications.map(notification => ({ ...notification, read: true })));
+  };
   
   return (
     <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 glass-dark backdrop-blur-md sticky top-0 z-20">
@@ -57,16 +111,33 @@ export default function TopNav({ title, subtitle, showMobileMenu, toggleMobileMe
         </div>
       </div>
       
-      {/* Clock/Date on the right side */}
+      {/* Clock/Date and Notifications on the right side */}
       <div className="flex items-center">
-        <div className="text-right hidden sm:block">
-          <p className="text-white/70 text-sm">{formattedDate}</p>
-          <p className="text-white font-medium">{formattedTime}</p>
-        </div>
-        <div className="ml-4 p-2 bg-white/10 rounded-full">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white/70" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-          </svg>
+        {showDateTime && (
+          <div className="text-right hidden sm:block">
+            <p className="text-white/70 text-sm">{formattedDate}</p>
+            <p className="text-white font-medium">{formattedTime}</p>
+          </div>
+        )}
+        <div className="relative ml-4">
+          <button
+            onClick={toggleNotifications}
+            className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors relative"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white/70" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+            </svg>
+            {hasUnreadNotifications && (
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            )}
+          </button>
+          <NotificationsPanel
+            isOpen={showNotifications}
+            onClose={() => setShowNotifications(false)}
+            notifications={notifications}
+            onMarkAsRead={handleMarkAsRead}
+            onMarkAllAsRead={handleMarkAllAsRead}
+          />
         </div>
       </div>
     </div>

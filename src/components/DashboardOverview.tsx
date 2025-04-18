@@ -16,7 +16,7 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface DashboardOverviewProps {
-  userCompanyData: CompanyData;
+  userCompanyData: CompanyData | null;
   setActiveTab: (tab: string) => void;
 }
 
@@ -25,12 +25,15 @@ export default function DashboardOverview({ userCompanyData, setActiveTab }: Das
   const [chartData, setChartData] = useState<any>(null);
   
   // Function to calculate total score and letter grade
-  const calculateTotalScore = (
-    company: CompanyData
-  ): { score: number; grade: string; gradeColor: string } => {
+  const calculateTotalScore = (company: CompanyData | null) => {
+    if (!company?.scores) return { score: 0, grade: 'N/A', gradeColor: '#6B7280' };
+    
     const categories = Object.keys(categoryLabels) as Category[];
     const totalPossible = categories.length * 20; // 5 categories * 20 points each
-    const totalScore = categories.reduce((sum, category) => sum + company[category], 0);
+    const totalScore = categories.reduce((sum, category) => {
+      const categoryScore = company.scores[category]?.totalScore || 0;
+      return sum + categoryScore;
+    }, 0);
     const percentage = (totalScore / totalPossible) * 100;
 
     // Determine letter grade based on percentage
@@ -59,7 +62,7 @@ export default function DashboardOverview({ userCompanyData, setActiveTab }: Das
   
   // Prepare chart data
   useEffect(() => {
-    if (userCompanyData) {
+    if (userCompanyData?.scores) {
       const categories = Object.keys(categoryLabels) as Category[];
       const chartColors = {
         background: 'rgba(47, 50, 149, 0.7)',
@@ -71,7 +74,7 @@ export default function DashboardOverview({ userCompanyData, setActiveTab }: Das
         datasets: [
           {
             label: 'Score (out of 20)',
-            data: categories.map(category => userCompanyData[category]),
+            data: categories.map(category => userCompanyData.scores[category]?.totalScore || 0),
             backgroundColor: chartColors.background,
             borderColor: chartColors.border,
             borderWidth: 1,
@@ -84,12 +87,18 @@ export default function DashboardOverview({ userCompanyData, setActiveTab }: Das
   
   // Find strongest and weakest categories
   const findStrongestCategory = (): { category: Category; score: number } => {
+    if (!userCompanyData?.scores) return { category: 'interpersonalFit', score: 0 };
+    
     const categories = Object.keys(categoryLabels) as Category[];
-    let strongest = { category: categories[0], score: userCompanyData[categories[0]] };
+    let strongest = { 
+      category: categories[0], 
+      score: userCompanyData.scores[categories[0]]?.totalScore || 0 
+    };
     
     categories.forEach(category => {
-      if (userCompanyData[category] > strongest.score) {
-        strongest = { category, score: userCompanyData[category] };
+      const categoryScore = userCompanyData.scores[category]?.totalScore || 0;
+      if (categoryScore > strongest.score) {
+        strongest = { category, score: categoryScore };
       }
     });
     
@@ -97,12 +106,18 @@ export default function DashboardOverview({ userCompanyData, setActiveTab }: Das
   };
   
   const findWeakestCategory = (): { category: Category; score: number } => {
+    if (!userCompanyData?.scores) return { category: 'interpersonalFit', score: 0 };
+    
     const categories = Object.keys(categoryLabels) as Category[];
-    let weakest = { category: categories[0], score: userCompanyData[categories[0]] };
+    let weakest = { 
+      category: categories[0], 
+      score: userCompanyData.scores[categories[0]]?.totalScore || 0 
+    };
     
     categories.forEach(category => {
-      if (userCompanyData[category] < weakest.score) {
-        weakest = { category, score: userCompanyData[category] };
+      const categoryScore = userCompanyData.scores[category]?.totalScore || 0;
+      if (categoryScore < weakest.score) {
+        weakest = { category, score: categoryScore };
       }
     });
     
@@ -158,11 +173,19 @@ export default function DashboardOverview({ userCompanyData, setActiveTab }: Das
     },
   };
   
+  if (!userCompanyData) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-white/70">Loading {user?.companyName}'s data...</div>
+      </div>
+    );
+  }
+  
   return (
     <div className="py-6 animate-fade-in">
       <div className="mb-8">
-        <h2 className="text-white text-xl font-bold mb-2">Welcome to your dashboard, {user?.name}</h2>
-        <p className="text-white/70">Here's how your company is performing on the Workbrand metrics.</p>
+        <h2 className="text-white text-xl font-bold mb-2">Welcome to your dashboard, {user?.name?.split(' ')[0]}</h2>
+        <p className="text-white/70">Here's how {user?.companyName} is performing on the Workbrand metrics.</p>
       </div>
       
       {/* Stats Overview */}
@@ -195,7 +218,7 @@ export default function DashboardOverview({ userCompanyData, setActiveTab }: Das
         
         <StatCard
           title="Employee Rating"
-          value={userCompanyData.glassdoorScore.toFixed(1) + "/5"}
+          value={`${userCompanyData.glassdoorScore?.toFixed(1) || 'N/A'}/5`}
           icon={
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -212,7 +235,7 @@ export default function DashboardOverview({ userCompanyData, setActiveTab }: Das
         
         <StatCard
           title="Employees"
-          value={userCompanyData.numEmployees.toLocaleString()}
+          value={userCompanyData.numEmployees?.toLocaleString() || 'N/A'}
           icon={
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -251,7 +274,7 @@ export default function DashboardOverview({ userCompanyData, setActiveTab }: Das
             </h3>
             <div>
               <p className="text-white/80 mb-3">
-                Your highest scoring category is <span className="text-white font-semibold">{categoryLabels[strongest.category]}</span> with a score of {strongest.score}/20.
+                {user?.companyName}'s highest scoring category is <span className="text-white font-semibold">{categoryLabels[strongest.category]}</span> with a score of {strongest.score}/20.
               </p>
               <button 
                 className="text-[#FE619E] text-sm hover:text-[#5474fe] transition-colors flex items-center"
@@ -273,7 +296,7 @@ export default function DashboardOverview({ userCompanyData, setActiveTab }: Das
             </h3>
             <div>
               <p className="text-white/80 mb-3">
-                Your lowest scoring category is <span className="text-white font-semibold">{categoryLabels[weakest.category]}</span> with a score of {weakest.score}/20.
+                {user?.companyName}'s lowest scoring category is <span className="text-white font-semibold">{categoryLabels[weakest.category]}</span> with a score of {weakest.score}/20.
               </p>
               <button 
                 className="text-[#FE619E] text-sm hover:text-[#5474fe] transition-colors flex items-center"
@@ -295,7 +318,7 @@ export default function DashboardOverview({ userCompanyData, setActiveTab }: Das
             </h3>
             <div>
               <p className="text-white/80 mb-3">
-                Compare your Workbrand score with industry competitors to get a better understanding of your position in the market.
+                Compare {user?.companyName}'s Workbrand score with industry competitors to get a better understanding of your position in the market.
               </p>
               <button 
                 className="text-[#FE619E] text-sm hover:text-[#5474fe] transition-colors flex items-center"

@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 
 // Types for the authentication system
@@ -8,6 +10,9 @@ export interface User {
   companyId: string;
   companyName: string;
   role: 'admin' | 'user';
+  emailNotifications: boolean;
+  showDateTime: boolean;
+  timezone: string;
 }
 
 interface AuthContextType {
@@ -15,6 +20,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  updatePreferences: (preferences: Partial<Pick<User, 'emailNotifications' | 'showDateTime' | 'timezone'>>) => void;
 }
 
 // Mock user data for demonstration purposes
@@ -27,6 +33,9 @@ const MOCK_USERS = [
     companyId: 'company-1',
     companyName: 'Workbrand Global',
     role: 'admin' as const,
+    emailNotifications: true,
+    showDateTime: true,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
   },
   {
     id: '2',
@@ -36,6 +45,9 @@ const MOCK_USERS = [
     companyId: 'company-2',
     companyName: 'Acme Corporation',
     role: 'user' as const,
+    emailNotifications: true,
+    showDateTime: true,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
   },
   {
     id: '3',
@@ -45,6 +57,9 @@ const MOCK_USERS = [
     companyId: 'company-3',
     companyName: 'TechCorp Inc.',
     role: 'user' as const,
+    emailNotifications: true,
+    showDateTime: true,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
   },
   {
     id: '4',
@@ -54,6 +69,9 @@ const MOCK_USERS = [
     companyId: 'mastercard',
     companyName: 'Mastercard',
     role: 'user' as const,
+    emailNotifications: true,
+    showDateTime: true,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
   },
   {
     id: '5',
@@ -63,6 +81,9 @@ const MOCK_USERS = [
     companyId: 'mastercard',
     companyName: 'Mastercard',
     role: 'admin' as const,
+    emailNotifications: true,
+    showDateTime: true,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
   },
 ];
 
@@ -72,6 +93,7 @@ export const AuthContext = createContext<AuthContextType>({
   loading: false,
   login: async () => {},
   logout: () => {},
+  updatePreferences: () => {},
 });
 
 // Custom hook for using auth context
@@ -90,14 +112,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Check for existing session in localStorage on initial load
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('workbrand_user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      setLoading(false);
+    const storedUser = localStorage.getItem('workbrand_user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      // Ensure timezone is always current and preferences have defaults
+      parsedUser.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      parsedUser.emailNotifications = parsedUser.emailNotifications ?? true;
+      parsedUser.showDateTime = parsedUser.showDateTime ?? true;
+      setUser(parsedUser);
     }
+    setLoading(false);
   }, []);
+
+  const updatePreferences = async (preferences: Partial<Pick<User, 'emailNotifications' | 'showDateTime' | 'timezone'>>) => {
+    if (!user) return;
+
+    const updatedUser = {
+      ...user,
+      ...preferences,
+      timezone: preferences.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+
+    // Update local storage
+    localStorage.setItem('workbrand_user', JSON.stringify(updatedUser));
+    
+    // Update state
+    setUser(updatedUser);
+  };
 
   const login = async (email: string, password: string) => {
     setLoading(true);
@@ -115,9 +156,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Create sanitized user object (without password)
       const { password: _, ...userWithoutPassword } = matchedUser;
 
+      // Ensure timezone is current and preferences have defaults
+      const updatedUser = {
+        ...userWithoutPassword,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        emailNotifications: userWithoutPassword.emailNotifications ?? true,
+        showDateTime: userWithoutPassword.showDateTime ?? true
+      };
+
       // Store user in state and localStorage
-      setUser(userWithoutPassword);
-      localStorage.setItem('workbrand_user', JSON.stringify(userWithoutPassword));
+      setUser(updatedUser);
+      localStorage.setItem('workbrand_user', JSON.stringify(updatedUser));
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -132,6 +181,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, loading, login, logout, updatePreferences }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
