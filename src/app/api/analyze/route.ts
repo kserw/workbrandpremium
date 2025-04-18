@@ -157,15 +157,6 @@ export async function POST(request: NextRequest) {
       case 'workbrand global':
         userCompanyData = { ...mockCompanyData.workbrand };
         break;
-      case 'acme':
-      case 'acme corp':
-        userCompanyData = { ...mockCompanyData.acme };
-        break;
-      case 'techcorp':
-      case 'techcorp inc.':
-      case 'techcorp inc':
-        userCompanyData = { ...mockCompanyData.techcorp };
-        break;
       default:
         // Check database or analyze new company
         userCompanyData = getCompany(companyName);

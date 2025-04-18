@@ -511,134 +511,16 @@ export const mockCompanyData = {
     analysis: {
       overview:
         'Workbrand delivers an exceptional workplace experience with strengths in innovation and employee development. Their commitment to helping other companies build strong employer brands is reflected in their own workplace practices.',
-      interpersonalFit:
+      brandPositionAndPerception:
         'Workbrand fosters a collaborative culture with strong leadership. Their workplace environment encourages teamwork and open communication, with a focus on inclusive practices that continue to evolve.',
-      thrivingAtWork:
-        'Workbrand offers robust career development opportunities and cultivates innovation. Their employer value proposition is strong, emphasizing personal and professional growth alongside work-life balance.',
-      experienceAndCompetency:
-        'Workbrand provides employees with modern tools and resources for success. Their professional development programs emphasize both technical skills and leadership capabilities.',
-      recognitionAndCompensation:
+      compensationAndBenefits:
         'Workbrand offers competitive compensation with a focus on recognizing exceptional work. Their performance review process is thorough and supportive of professional growth.',
-      purposeAndInvolvement:
+      growthAndDevelopment:
+        'Workbrand provides employees with modern tools and resources for success. Their professional development programs emphasize both technical skills and leadership capabilities.',
+      peopleAndCulture:
+        'Workbrand offers robust career development opportunities and cultivates innovation. Their employer value proposition is strong, emphasizing personal and professional growth alongside work-life balance.',
+      innovationAndProducts:
         "Workbrand's mission to improve workplaces globally gives employees a strong sense of purpose. Their corporate social responsibility initiatives align with their core business of improving work environments.",
-    },
-  },
-
-  acme: {
-    interpersonalFit: 17,
-    thrivingAtWork: 16,
-    experienceAndCompetency: 18,
-    recognitionAndCompensation: 16,
-    purposeAndInvolvement: 15,
-    glassdoorScore: 3.9,
-    numEmployees: 12000,
-    primaryColor: '#E74C3C',
-    top3Words: ['Reliable', 'Traditional', 'Structured'],
-    evpStatement:
-      'Acme Corporation provides employees with stability and growth opportunities in an established industry leader, offering comprehensive benefits and a clear path for advancement.',
-    subcategories: {
-      // Interpersonal Fit subcategories (17 total)
-      diversityAndInclusion: 4,
-      leadershipEffectiveness: 4,
-      employeeAdvocacy: 4,
-      workplaceCulture: 5,
-
-      // Thriving at Work subcategories (16 total)
-      employerValueProposition: 4,
-      careerDevelopment: 4,
-      innovationAdvancement: 3,
-      workLifeBalance: 5,
-
-      // Experience and Competency subcategories (18 total)
-      employeeExperience: 4,
-      competencyUtilization: 5,
-      professionalGrowth: 4,
-      resourceAccess: 5,
-
-      // Recognition and Compensation subcategories (16 total)
-      compensationCompetitiveness: 4,
-      talentRetention: 4,
-      performanceRecognition: 4,
-      compensationTransparency: 4,
-
-      // Purpose and Involvement subcategories (15 total)
-      socialResponsibility: 3,
-      sustainabilityInitiatives: 3,
-      employeeEngagement: 4,
-      meaningfulWork: 5,
-    },
-    analysis: {
-      overview:
-        'Acme Corporation offers a stable workplace with traditional values and structured advancement paths. While not leading in innovation, they excel in creating a reliable work environment with strong work-life balance.',
-      interpersonalFit:
-        'Acme Corporation maintains a consistent workplace culture with established leadership practices. Their employee relations are generally positive, though some teams report hierarchical communication challenges.',
-      thrivingAtWork:
-        'Acme Corporation provides clear career advancement paths within a structured environment. Innovation is not their primary focus, but they invest in employee development within established frameworks.',
-      experienceAndCompetency:
-        'Acme Corporation ensures employees have the resources needed to succeed in their roles. Their competency development programs are comprehensive, particularly for technical and operational roles.',
-      recognitionAndCompensation:
-        'Acme Corporation offers market-competitive compensation with traditional benefits. Their performance recognition is systematic and consistent, though some employees seek more personalized acknowledgment.',
-      purposeAndInvolvement:
-        "Acme Corporation's long history provides employees with a sense of stability. While their social responsibility initiatives are developing, many employees find meaning in the organization's reliability and market position.",
-    },
-  },
-
-  techcorp: {
-    interpersonalFit: 16,
-    thrivingAtWork: 19,
-    experienceAndCompetency: 20,
-    recognitionAndCompensation: 18,
-    purposeAndInvolvement: 17,
-    glassdoorScore: 4.2,
-    numEmployees: 5800,
-    primaryColor: '#3498DB',
-    top3Words: ['Innovative', 'Fast-paced', 'Technical'],
-    evpStatement:
-      'TechCorp Inc. drives technological advancement through a culture of innovation and technical excellence, offering talented professionals the opportunity to work on cutting-edge solutions that shape the future.',
-    subcategories: {
-      // Interpersonal Fit subcategories (16 total)
-      diversityAndInclusion: 3,
-      leadershipEffectiveness: 4,
-      employeeAdvocacy: 4,
-      workplaceCulture: 5,
-
-      // Thriving at Work subcategories (19 total)
-      employerValueProposition: 5,
-      careerDevelopment: 5,
-      innovationAdvancement: 5,
-      workLifeBalance: 4,
-
-      // Experience and Competency subcategories (20 total)
-      employeeExperience: 5,
-      competencyUtilization: 5,
-      professionalGrowth: 5,
-      resourceAccess: 5,
-
-      // Recognition and Compensation subcategories (18 total)
-      compensationCompetitiveness: 5,
-      talentRetention: 4,
-      performanceRecognition: 5,
-      compensationTransparency: 4,
-
-      // Purpose and Involvement subcategories (17 total)
-      socialResponsibility: 3,
-      sustainabilityInitiatives: 4,
-      employeeEngagement: 5,
-      meaningfulWork: 5,
-    },
-    analysis: {
-      overview:
-        'TechCorp Inc. excels in technical innovation and competency development, creating an environment where technological excellence is paramount. While diversity initiatives are still evolving, they offer exceptional career growth for technical professionals.',
-      interpersonalFit:
-        'TechCorp Inc. has a fast-paced culture focused on technical achievement. Their workplace dynamics value expertise and innovation, though diversity and inclusion initiatives have room for improvement.',
-      thrivingAtWork:
-        'TechCorp Inc. provides outstanding opportunities for technical career advancement. Their commitment to innovation creates an exciting work environment where employees can develop cutting-edge skills.',
-      experienceAndCompetency:
-        'TechCorp Inc. invests heavily in technical resources and tools. Their professional development programs are exceptional, particularly for employees in engineering and product development roles.',
-      recognitionAndCompensation:
-        'TechCorp Inc. offers competitive compensation with strong performance bonuses. Their recognition systems reward technical innovation and problem-solving, creating a meritocratic environment.',
-      purposeAndInvolvement:
-        "TechCorp Inc.'s mission to advance technology gives employees a sense of contribution to progress. While their social responsibility programs are developing, many employees find purpose in creating innovative solutions.",
     },
   },
 };
